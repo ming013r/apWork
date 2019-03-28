@@ -23,28 +23,20 @@ def transfromData(rawData):
     scaledData = sc.fit_transform(npRaw.reshape(-1,1))
     return scaledData
                                   
-								  
+import json							  
 with open('Output.txt', 'r') as myfile:
   data = myfile.read()
-import json
 trainData = json.loads(data)
 
 
 
-
-from tslearn.generators import random_walk_blobs
-from tslearn.preprocessing import TimeSeriesScalerMinMax, to_time_series_dataset
-from tslearn.neighbors import KNeighborsTimeSeriesClassifier, KNeighborsTimeSeries
-from tslearn.piecewise import SymbolicAggregateApproximation
-import numpy as np
-
-time_series = to_time_series_dataset(trainData)
-knn = KNeighborsTimeSeries(n_neighbors=1).fit(time_series)
+from sklearn.neighbors import NearestNeighbors
+neigh = NearestNeighbors(n_neighbors=3)
+neigh.fit(trainData)
+result = neigh.kneighbors(trainData, return_distance=False)
 
 
-ind = knn.kneighbors(to_time_series_dataset(trainData), return_distance=False)
-print(ind)
-
-
-
-
+json_string2 = json.dumps(result)
+text_file = open("result.txt", "w")
+text_file.write(json_string2)
+text_file.close()
