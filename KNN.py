@@ -23,11 +23,8 @@ def transfromData(rawData):
     scaledData = sc.fit_transform(npRaw.reshape(-1,1))
     return scaledData
                                   
-import json							  
-with open('Output.txt', 'r') as myfile:
-  data = myfile.read()
-trainData = json.loads(data)
-
+import pickle
+trainData = pickle.load( open( "data.p", "rb" ) )
 
 
 from sklearn.neighbors import NearestNeighbors
