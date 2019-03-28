@@ -32,8 +32,3 @@ neigh = NearestNeighbors(n_neighbors=3)
 neigh.fit(trainData)
 result = neigh.kneighbors(trainData, return_distance=False)
 
-
-json_string2 = json.dumps(result)
-text_file = open("result.txt", "w")
-text_file.write(json_string2)
-text_file.close()
