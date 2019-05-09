@@ -6,7 +6,7 @@ import pandas as pd
 
 from keras.models import Sequential
 from keras.layers import Dense
-from keras.layers import LSTM, Bidirectional
+from keras.layers import LSTM, Bidirectional,CuDNNLSTM 
 from keras.layers import Dropout
 from keras.callbacks import EarlyStopping
 
@@ -15,6 +15,23 @@ import xlwt
 from sklearn.preprocessing import MinMaxScaler
 import datetime,pickle,os,glob
 
+
+def getStationList():
+    with open('pickles/stationList.pickle', 'rb') as handle:
+        stationList = pickle.load(handle)
+    os.chdir('excelFiles/LSTM')
+    replaceDict = ['.xls','LSTMresult']
+    for direct in glob.glob("*.xls"):
+        fileName = direct                                               
+        for w in replaceDict:
+            fileName = fileName.replace(w,'')
+        
+        if fileName in stationList:
+            stationList.remove(fileName)
+            print(fileName)
+    os.chdir('../..')
+    partStation = stationList[:19]
+    return partStation
 def transfromData(trainRaw, testRaw,windosSize):  ##Train ratial, train, test
     sc = MinMaxScaler(feature_range = (0, 1))
 
@@ -41,11 +58,11 @@ def splitXy(data,windosSize):
 def buildModel(outSize):
     regressor = Sequential()
     #regressor.add(Bidirectional(LSTM(units=50,return_sequences=True),input_shape = (X_train.shape[1], 1)))
-    regressor.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
+    regressor.add(CuDNNLSTM (units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
     regressor.add(Dropout(0.2))
-    regressor.add(LSTM(units = 50,return_sequences=True))
+    regressor.add(CuDNNLSTM (units = 50,return_sequences=True))
     regressor.add(Dropout(0.2))
-    regressor.add(LSTM(units = 50))
+    regressor.add(CuDNNLSTM (units = 50))
     regressor.add(Dropout(0.2))
     regressor.add(Dense(units = outSize))
     # Compiling
@@ -53,21 +70,6 @@ def buildModel(outSize):
     return regressor
 
 
-def getStationList():
-    with open('pickles/stationList.pickle', 'rb') as handle:
-        stationList = pickle.load(handle)
-    os.chdir('excelFiles/LSTM')
-    replaceDict = ['.xls','LSTMresult']
-    for direct in glob.glob("*.xls"):
-        fileName = direct                                               
-        for w in replaceDict:
-            fileName = fileName.replace(w,'')
-        
-        if fileName in stationList:
-            stationList.remove(fileName)
-            print(fileName)
-    os.chdir('../..')
-    return stationList
 def Visualize():
     predicted = sc.inverse_transform(regressor.predict(X_test))
     originY = sc.inverse_transform (y_test)
@@ -111,7 +113,7 @@ def train(regressor,sc, X_train, y_train, X_test, y_test,epochs,windowSize,stati
 
 
 
-epochs = 2
+epochs = 250
 stationList = getStationList()
 col=1
 for station in stationList:
