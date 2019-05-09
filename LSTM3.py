@@ -118,7 +118,7 @@ col=1
 for station in stationList:
     print("training : " +station)
     MSEs = []
-    for windowSize in range(7,17):
+    for windowSize in range(7,31):
         sc, X_train, y_train, X_test, y_test = fetchData(station,windowSize)
         regressor = buildModel(windowSize-6)
         mse = train(regressor,sc,X_train, y_train, X_test, y_test,epochs)
