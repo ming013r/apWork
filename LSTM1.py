@@ -58,11 +58,11 @@ def splitXy(data,windosSize):
 def buildModel(outSize):
     regressor = Sequential()
     #regressor.add(Bidirectional(LSTM(units=50,return_sequences=True),input_shape = (X_train.shape[1], 1)))
-    regressor.add(CuDNNLSTM (units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
+    regressor.add(LSTM (units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
     regressor.add(Dropout(0.2))
-    regressor.add(CuDNNLSTM (units = 50,return_sequences=True))
+    regressor.add(LSTM (units = 50,return_sequences=True))
     regressor.add(Dropout(0.2))
-    regressor.add(CuDNNLSTM (units = 50))
+    regressor.add(LSTM (units = 50))
     regressor.add(Dropout(0.2))
     regressor.add(Dense(units = outSize))
     # Compiling
@@ -103,8 +103,15 @@ def train(regressor,sc, X_train, y_train, X_test, y_test,epochs,windowSize,stati
         regressor.fit(X_train, y_train,validation_split=0.2, epochs = 1, batch_size = 32,verbose=2)
         predicted = sc.inverse_transform(regressor.predict(X_test))
         originY = sc.inverse_transform (y_test)
-        mse = mean_squared_error(predicted, originY)
-        mae = mean_absolute_error(predicted,originY)
+        preLasts = []
+        print(predicted)
+        for pre in predicted:
+            preLasts.append(pre[-1:])
+        oriLasts = []
+        for ori in originY:
+            oriLasts.append(ori[-1:])
+        mse = mean_squared_error(preLasts, oriLasts)
+        mae = mean_absolute_error(preLasts,oriLasts)
         print("Epoch : " +str(i)+", MSE : ["+str(mse)+"]")
         print('-------------------------------------------')
     regressor.save('model/LSTM/LSTM'+station+str(windowSize-6)+'.h5')
@@ -126,7 +133,6 @@ for station in stationList:
         mse,mae = train(regressor,sc,X_train, y_train, X_test, y_test,epochs,windowSize,station)
         MSEs.append(mse)
         MAEs.append(mae)
-    
     book = xlwt.Workbook(encoding="utf-8")
     sheet1 = book.add_sheet("Sheet1")
     writeExcelHead(sheet1,epochs,station)
