@@ -18,15 +18,14 @@ from keras.models import load_model
 from tqdm import tqdm_notebook as tqdm
 
 
-def mse(model,sc, X_train, y_train, X_test, y_test,epochs):
+def mse(model,sc, X_train, y_train, X_test, y_test):
     MSEs = []
-    for i in range(epochs):
-        predicted = sc.inverse_transform(model.predict(X_test))
-        originY = sc.inverse_transform (y_test)
+    predicted = sc.inverse_transform(model.predict(X_test))
+    originY = sc.inverse_transform (y_test)
         #mse = mean_squared_error(predicted, originY)
-        for idx in len(predicted):
-            mse = mean_squared_error(predicted[idx],originY[idx])
-            MSEs.append(mse)
+    for idx in len(predicted):
+        mse = mean_squared_error(predicted[idx],originY[idx])
+        MSEs.append(mse)
     return MSEs
 def fetchData(station,windosSize):
     with open('pickles/'+station+'2017trainRaw.pickle', 'rb') as handle:
@@ -70,7 +69,7 @@ for station in tqdm(station_list):
     sc, X_train, y_train, X_test, y_test = fetchData(station,31)
     model = load_model(route_dict[station])
     
-    MSEs = mse(model,sc,X_train, y_train, X_test, y_test,epochs)
+    MSEs = mse(model,sc,X_train, y_train, X_test, y_test)
  
     book = xlwt.Workbook(encoding="utf-8")
     sheet1 = book.add_sheet("Sheet1")
