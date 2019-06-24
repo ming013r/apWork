@@ -81,7 +81,7 @@ for station in tqdm(station_list):
     print(station)
     sc, X_train, y_train, X_test, y_test = fetchData(station,30)
     model = buildModel()
-	model =load_model(route_dict[station])
+    model = load_model(route_dict[station])
     
     MSEs = mse(model,sc,X_train, y_train, X_test, y_test)
  
