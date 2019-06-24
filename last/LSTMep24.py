@@ -77,11 +77,11 @@ def splitXy(data,windosSize):
 def buildModel():
     regressor = Sequential()
     #regressor.add(Bidirectional(LSTM(units=50,return_sequences=True),input_shape = (X_train.shape[1], 1)))
-    regressor.add(CuDNNLSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
+    regressor.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
     regressor.add(Dropout(0.2))
-    regressor.add(CuDNNLSTM(units = 50,return_sequences=True))
+    regressor.add(LSTM(units = 50,return_sequences=True))
     regressor.add(Dropout(0.2))
-    regressor.add(CuDNNLSTM(units = 50))
+    regressor.add(LSTM(units = 50))
     regressor.add(Dropout(0.2))
     regressor.add(Dense(units = 24))
     # Compiling
