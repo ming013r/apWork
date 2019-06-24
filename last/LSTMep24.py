@@ -35,9 +35,9 @@ import datetime,pickle,os,glob
 
 def mse(model,sc, X_train, y_train, X_test, y_test):
     MSEs = []
-	MAEs = []
-    predicted = sc.inverse_transform(model.predict(X_test))
-    originY = sc.inverse_transform (y_test)
+	sMAEs = []
+	predicted = sc.inverse_transform(model.predict(X_test))
+	originY = sc.inverse_transform (y_test)
         #mse = mean_squared_error(predicted, originY)
     for idx in range(24):
         mse = mean_squared_error(predicted[:,idx],originY[:,idx])
@@ -110,7 +110,7 @@ for station in tqdm(station_list):
 mse_list = np.array(mse_list)
 mae_list = np.array(mae_list)
 
-avg_mse =[]
+avg_mse = []
 avg_mae = []
 for idx in range(24):
     avg_mse.append(mse_list[:,idx].mean())
