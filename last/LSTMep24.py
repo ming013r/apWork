@@ -66,7 +66,7 @@ with open('ep24route.pickle', 'rb') as file:
 with open('stationList.pickle', 'rb') as handle:
     station_list = pickle.load(handle)
 for station in tqdm(station_list):
-    sc, X_train, y_train, X_test, y_test = fetchData(station,31)
+    sc, X_train, y_train, X_test, y_test = fetchData(station,30)
     model = load_model(route_dict[station])
     
     MSEs = mse(model,sc,X_train, y_train, X_test, y_test)
