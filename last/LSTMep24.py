@@ -38,8 +38,8 @@ def mse(model,sc, X_train, y_train, X_test, y_test):
     predicted = sc.inverse_transform(model.predict(X_test))
     originY = sc.inverse_transform (y_test)
         #mse = mean_squared_error(predicted, originY)
-    for idx in range(len(predicted)):
-        mse = mean_squared_error(predicted[idx],originY[idx])
+    for idx in range(24):
+        mse = mean_squared_error(predicted[:,idx],originY[:,idx])
         MSEs.append(mse)
     return MSEs
 def fetchData(station,windosSize):
@@ -93,7 +93,6 @@ with open('ep24route.pickle', 'rb') as file:
 with open('stationList.pickle', 'rb') as handle:
     station_list = pickle.load(handle)
 for station in tqdm(station_list):
-    print(station)
     sc, X_train, y_train, X_test, y_test = fetchData(station,30)
     model = buildModel()
     model = load_model(route_dict[station])
