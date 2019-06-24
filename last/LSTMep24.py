@@ -15,7 +15,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.models import load_model
 
-#from tqdm import tqdm_notebook as tqdm
+from tqdm import tqdm
 
 
 def mse(model,sc, X_train, y_train, X_test, y_test):
