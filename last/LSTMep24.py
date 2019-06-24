@@ -23,7 +23,7 @@ def mse(model,sc, X_train, y_train, X_test, y_test):
     predicted = sc.inverse_transform(model.predict(X_test))
     originY = sc.inverse_transform (y_test)
         #mse = mean_squared_error(predicted, originY)
-    for idx in len(predicted):
+    for idx in range(len(predicted)):
         mse = mean_squared_error(predicted[idx],originY[idx])
         MSEs.append(mse)
     return MSEs
