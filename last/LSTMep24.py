@@ -18,8 +18,6 @@ from keras.models import load_model
 from tqdm import tqdm_notebook as tqdm
 
 
-
-	
 def mse(model,sc, X_train, y_train, X_test, y_test,epochs):
     MSEs = []
     for i in range(epochs):
@@ -66,8 +64,8 @@ def splitXy(data,windosSize):
 
 with open('ep24route.pickle', 'rb') as file:
     route_dict =pickle.load(file)
-
-	
+with open('stationList.pickle', 'rb') as handle:
+    station_list = pickle.load(handle)
 for station in tqdm(station_list):
     sc, X_train, y_train, X_test, y_test = fetchData(station,31)
     model = load_model(route_dict[station])
