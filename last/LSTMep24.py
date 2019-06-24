@@ -59,7 +59,7 @@ def splitXy(data,windosSize):
     X, y = np.array(X), np.array(y)
     X = np.reshape(X, (X.shape[0], X.shape[1], 1))
     return X,y
-def buildModel(24):
+def buildModel():
     regressor = Sequential()
     #regressor.add(Bidirectional(LSTM(units=50,return_sequences=True),input_shape = (X_train.shape[1], 1)))
     regressor.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
@@ -80,7 +80,7 @@ with open('stationList.pickle', 'rb') as handle:
 for station in tqdm(station_list):
     print(station)
     sc, X_train, y_train, X_test, y_test = fetchData(station,30)
-    model = buildModel(24)
+    model = buildModel()
 	model =load_model(route_dict[station])
     
     MSEs = mse(model,sc,X_train, y_train, X_test, y_test)
