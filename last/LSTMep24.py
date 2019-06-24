@@ -104,8 +104,8 @@ for station in tqdm(station_list):
     model = load_model(route_dict[station])
     
     MSEs, MAEs = mse(model,sc,X_train, y_train, X_test, y_test)
-	mse_list.append(MSEs)
-	mae_list.append(MAEs)
+    mse_list.append(MSEs)
+    mae_list.append(MAEs)
 	
 mse_list = np.array(mse_list)
 mae_list = np.array(mae_list)
@@ -114,7 +114,7 @@ avg_mse = []
 avg_mae = []
 for idx in range(24):
     avg_mse.append(mse_list[:,idx].mean())
-	avg_mae.append(mae_list[:,idx].mean())
+    avg_mae.append(mae_list[:,idx].mean())
 	
 book = xlwt.Workbook(encoding="utf-8")
 sheet1 = book.add_sheet("Sheet1")
@@ -123,8 +123,6 @@ for idx in range(len(avg_mse)):
     sheet1.write(idx,1,avg_mse[idx])
 for idx in range(len(avg_mae)):
     sheet1.write(idx,2,avg_mae[idx])
-	
-       
 book.save("excel/LSTMresult-total.xls")
 
 	
