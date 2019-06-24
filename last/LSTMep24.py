@@ -15,10 +15,11 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.models import load_model
 
-from tqdm import tqdm_notebook as tqdm
+#from tqdm import tqdm_notebook as tqdm
 
 
 def mse(model,sc, X_train, y_train, X_test, y_test):
+    model.
     MSEs = []
     predicted = sc.inverse_transform(model.predict(X_test))
     originY = sc.inverse_transform (y_test)
@@ -59,7 +60,19 @@ def splitXy(data,windosSize):
     X, y = np.array(X), np.array(y)
     X = np.reshape(X, (X.shape[0], X.shape[1], 1))
     return X,y
-
+def buildModel(24):
+    regressor = Sequential()
+    #regressor.add(Bidirectional(LSTM(units=50,return_sequences=True),input_shape = (X_train.shape[1], 1)))
+    regressor.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
+    regressor.add(Dropout(0.2))
+    regressor.add(LSTM(units = 50,return_sequences=True))
+    regressor.add(Dropout(0.2))
+    regressor.add(LSTM(units = 50))
+    regressor.add(Dropout(0.2))
+    regressor.add(Dense(units = 24))
+    # Compiling
+    regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
+    return regressor
 
 with open('ep24route.pickle', 'rb') as file:
     route_dict =pickle.load(file)
@@ -68,7 +81,8 @@ with open('stationList.pickle', 'rb') as handle:
 for station in tqdm(station_list):
     print(station)
     sc, X_train, y_train, X_test, y_test = fetchData(station,30)
-    model = load_model(route_dict[station])
+    model = buildModel(24)
+	model =load_model(route_dict[station])
     
     MSEs = mse(model,sc,X_train, y_train, X_test, y_test)
  
