@@ -35,13 +35,16 @@ import datetime,pickle,os,glob
 
 def mse(model,sc, X_train, y_train, X_test, y_test):
     MSEs = []
+	MAEs = []
     predicted = sc.inverse_transform(model.predict(X_test))
     originY = sc.inverse_transform (y_test)
         #mse = mean_squared_error(predicted, originY)
     for idx in range(24):
         mse = mean_squared_error(predicted[:,idx],originY[:,idx])
+		mae = mean_absolute_error(predicted[:,idx],originY[:,idx])
         MSEs.append(mse)
-    return MSEs
+		MAEs.append(mae)
+    return MSEs, MAEs
 def fetchData(station,windosSize):
     with open('pickles/'+station+'2017trainRaw.pickle', 'rb') as handle:
         trainRawData = pickle.load(handle)
@@ -92,19 +95,36 @@ with open('ep24route.pickle', 'rb') as file:
     route_dict =pickle.load(file)
 with open('stationList.pickle', 'rb') as handle:
     station_list = pickle.load(handle)
+	
+mse_list = []
+mae_list = []
 for station in tqdm(station_list):
     sc, X_train, y_train, X_test, y_test = fetchData(station,30)
     model = buildModel()
     model = load_model(route_dict[station])
     
-    MSEs = mse(model,sc,X_train, y_train, X_test, y_test)
- 
-    book = xlwt.Workbook(encoding="utf-8")
-    sheet1 = book.add_sheet("Sheet1")
+    MSEs, MAEs = mse(model,sc,X_train, y_train, X_test, y_test)
+	mse_list.append(MSEs)
+	mae_list.append(MAEs)
+	
+mse_list = np.array(mse_list)
+mae_list = np.array(mae_list)
+
+avg_mse =[]
+avg_mae = []
+for idx in range(24):
+    avg_mse.append(mse_list[:,idx].mean())
+	avg_mae.append(mae_list[:,idx].mean())
+	
+book = xlwt.Workbook(encoding="utf-8")
+sheet1 = book.add_sheet("Sheet1")
     
-    for idx in range(len(MSEs)):
-        sheet1.write(idx,1,MSEs[idx])
+for idx in range(len(avg_mse)):
+    sheet1.write(idx,1,avg_mse[idx])
+for idx in range(len(avg_mae)):
+    sheet1.write(idx,2,avg_mae[idx])
+	
        
-    book.save("excel/LSTMresult-"+station+".xls")
+book.save("excel/LSTMresult-total.xls")
 
 	
