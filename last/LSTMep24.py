@@ -75,7 +75,7 @@ for station in tqdm(station_list):
     sheet1 = book.add_sheet("Sheet1")
     
     for idx in range(len(MSEs)):
-        sheet1.write(row,1,MSEs[idx])
+        sheet1.write(idx,1,MSEs[idx])
        
     book.save("excel/LSTMresult-"+station+".xls")
 
