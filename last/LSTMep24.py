@@ -16,7 +16,22 @@ from keras.layers import Dense
 from keras.models import load_model
 
 from tqdm import tqdm
+import numpy as np
+import math
+import matplotlib.pyplot as plt  
+from sklearn.metrics import mean_squared_error,mean_absolute_error
+import pandas as pd
 
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM, Bidirectional,CuDNNLSTM 
+from keras.layers import Dropout
+from keras.callbacks import EarlyStopping
+
+import sys
+import xlwt
+from sklearn.preprocessing import MinMaxScaler
+import datetime,pickle,os,glob
 
 def mse(model,sc, X_train, y_train, X_test, y_test):
     MSEs = []
@@ -62,11 +77,11 @@ def splitXy(data,windosSize):
 def buildModel():
     regressor = Sequential()
     #regressor.add(Bidirectional(LSTM(units=50,return_sequences=True),input_shape = (X_train.shape[1], 1)))
-    regressor.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
+    regressor.add(CuDNNLSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
     regressor.add(Dropout(0.2))
-    regressor.add(LSTM(units = 50,return_sequences=True))
+    regressor.add(CuDNNLSTM(units = 50,return_sequences=True))
     regressor.add(Dropout(0.2))
-    regressor.add(LSTM(units = 50))
+    regressor.add(CuDNNLSTM(units = 50))
     regressor.add(Dropout(0.2))
     regressor.add(Dense(units = 24))
     # Compiling
