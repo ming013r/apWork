@@ -19,7 +19,6 @@ from keras.models import load_model
 
 
 def mse(model,sc, X_train, y_train, X_test, y_test):
-    model.
     MSEs = []
     predicted = sc.inverse_transform(model.predict(X_test))
     originY = sc.inverse_transform (y_test)
