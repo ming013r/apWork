@@ -15,6 +15,8 @@ import xlwt
 from sklearn.preprocessing import MinMaxScaler
 import datetime,pickle,os,glob
 
+from tqdm import tqdm
+
 
 def getStationList():
     with open('pickles/stationList.pickle', 'rb') as handle:
@@ -30,7 +32,7 @@ def getStationList():
             stationList.remove(fileName)
             print(fileName)
     os.chdir('../..')
-    partStation = stationList[:19]
+    partStation = stationList[57:76]
     return partStation
 def transfromData(trainRaw, testRaw):  ##Train ratial, train, test
     sc = MinMaxScaler(feature_range = (0, 1))
@@ -99,16 +101,16 @@ def fetchData(station):
     return sc, X_train, y_train, X_test, y_test
 
 def train(model,sc, X_train, y_train, X_test, y_test,epochs,windowSize,station):
-    for i in range(epochs):
+    for i in tqdm(range(epochs)):
         model.fit(X_train, y_train,validation_split=0.2, epochs = 1, batch_size = 32,verbose=0)
-        predicted = sc.inverse_transform(model.predict(X_test))
-        originY = sc.inverse_transform (y_test)
+
+        
+    predicted = sc.inverse_transform(model.predict(X_test))
+    originY = sc.inverse_transform (y_test)
        
-       
-        mse = mean_squared_error(predicted, originY)
-        mae = mean_absolute_error(predicted,originY)
-        print("Epoch : " +str(i)+", MSE : ["+str(mse)+"]")
-        print('-------------------------------------------')
+    mse = mean_squared_error(predicted, originY)
+    mae = mean_absolute_error(predicted,originY)
+
     model.save('model/LSTM/LSTM'+station+str(windowSize-6)+'.h5')
     return mse,mae
 
@@ -118,11 +120,11 @@ def train(model,sc, X_train, y_train, X_test, y_test,epochs,windowSize,station):
 epochs = 250
 stationList = getStationList()
 col=1
-for station in stationList:
+for station in tqdm(stationList):
     print("training : " +station)
     MSEs = []
     MAEs = []
-    for windowSize in range(7,31):
+    for windowSize in tqdm(range(7,31)):
         sc, X_train, y_train, X_test, y_test = fetchData(station)
         model = buildModel()
         mse,mae = train(model,sc,X_train, y_train, X_test, y_test,epochs,windowSize,station)
