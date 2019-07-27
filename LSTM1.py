@@ -22,7 +22,7 @@ def getStationList():
     with open('pickles/stationList.pickle', 'rb') as handle:
         stationList = pickle.load(handle)
     os.chdir('excelFiles/LSTM')
-    replaceDict = ['.xls','LSTMresult']
+    replaceDict = ['.xls','LSTMresult-']
     for direct in glob.glob("*.xls"):
         fileName = direct                                               
         for w in replaceDict:
