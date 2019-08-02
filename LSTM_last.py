@@ -31,8 +31,8 @@ def getStationList():
             stationList.remove(fileName)
             print(fileName)
     os.chdir('../..')
-    partStation = ['忠明','臺南','鳳山','花蓮']
-    return partStation
+
+    return stationList
 def transfromData(trainRaw, testRaw,windowSize):  ##Train ratial, train, test
     sc = MinMaxScaler(feature_range = (0, 1))
 
