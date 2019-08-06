@@ -1,12 +1,12 @@
 import numpy as np
 import math
-import matplotlib.pyplot as plt  
+import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error,mean_absolute_error
 import pandas as pd
 
 from keras.models import Sequential
 from keras.layers import Dense
-from keras.layers import LSTM, Bidirectional 
+from keras.layers import LSTM, Bidirectional
 from keras.layers import Dropout
 from keras.callbacks import EarlyStopping
 
@@ -15,7 +15,7 @@ import xlwt
 from sklearn.preprocessing import MinMaxScaler
 import datetime,pickle,os,glob
 
-from tqdm import tqdm 
+from tqdm import tqdm
 
 def getStationList():
     with open('pickles/stationList.pickle', 'rb') as handle:
@@ -23,10 +23,10 @@ def getStationList():
     os.chdir('excelFiles/LSTM')
     replaceDict = ['.xls','LSTMresult-']
     for direct in glob.glob("*.xls"):
-        fileName = direct                                               
+        fileName = direct
         for w in replaceDict:
             fileName = fileName.replace(w,'')
-        
+
         if fileName in stationList:
             stationList.remove(fileName)
             print(fileName)
@@ -38,7 +38,7 @@ def transfromData(trainRaw, testRaw,windowSize):  ##Train ratial, train, test
 
     npTrain = sc.fit_transform(np.array(trainRaw).reshape(-1,1))
     npTest = sc.fit_transform(np.array(testRaw).reshape(-1,1))
-    
+
     X_train, y_train = splitXy(npTrain,windowSize)
     X_test, y_test = splitXy(npTest,windowSize)
     return sc, X_train, y_train, X_test, y_test
@@ -79,8 +79,8 @@ def Visualize():
     originY = sc.inverse_transform (y_test)
     print("MSE : ["+str(mean_squared_error(predicted, originY))+"]")
     # Visualising the results
-    plt.plot(originY[:100], color = 'red', label = 'Real')  
-    plt.plot(predicted[:100], color = 'blue', label = 'Predicted ') 
+    plt.plot(originY[:100], color = 'red', label = 'Real')
+    plt.plot(predicted[:100], color = 'blue', label = 'Predicted ')
     plt.legend()
     plt.show()
 def writeExcelHead(sheet1,epochs,station):
@@ -98,22 +98,23 @@ def fetchData(station,windowSize):
         trainRawData = pickle.load(handle)
     with open('pickles/'+station+'2017testRaw.pickle', 'rb') as handle:
         testRawData = pickle.load(handle)
-        
+
     sc, X_train, y_train, X_test, y_test = transfromData(trainRawData,testRawData,windowSize)
     return sc, X_train, y_train, X_test, y_test
 
 def train(model,epochs,windowSize,station):
-    
+
     sc, X_train, y_train, X_test, y_test = fetchData(station,windowSize)
 
-    
-    for i in tqdm(range(epochs)):
-        model.fit(X_train, y_train,validation_split=0.2, epochs = 1, batch_size = 32,verbose=0)
 
-        
+    for i in range(epochs):
+        model.fit(X_train, y_train,validation_split=0.2, epochs = 1, batch_size = 32,verbose=0)
+        print('Current Epoch:',i,'time steps : ', windowSize-6)
+
+
     predicted = sc.inverse_transform(model.predict(X_test))
     originY = sc.inverse_transform (y_test)
-       
+
     mse = mean_squared_error(predicted, originY)
     mae = mean_absolute_error(predicted,originY)
 
@@ -126,16 +127,16 @@ def train(model,epochs,windowSize,station):
 epochs = 250
 stationList = getStationList()
 col=1
-for station in tqdm(stationList):
+for station in stationList:
     print("training : " +station)
     MSEs = []
     MAEs = []
-    for windowSize in tqdm(range(7,31)):
+    for windowSize in range(7,31):
         model = buildModel()
         mse,mae = train(model,epochs,windowSize,station)
         MSEs.append(mse)
         MAEs.append(mae)
-        
+
     book = xlwt.Workbook(encoding="utf-8")
     sheet1 = book.add_sheet("Sheet1")
     writeExcelHead(sheet1,epochs,station)
@@ -148,9 +149,5 @@ for station in tqdm(stationList):
         sheet1.write(row,2,m)
         row+=1
     book.save("excelFiles/LSTM/LSTMresult-"+station+".xls")
-        
+
     print('check point at ' + str(datetime.datetime.now()))
-
-
-
-
