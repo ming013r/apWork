@@ -31,23 +31,29 @@ def getStationList():
             stationList.remove(fileName)
             print(fileName)
     os.chdir('../..')
-
     return stationList
-def transfromData(trainRaw, testRaw,windowSize):  ##Train ratial, train, test
+def clean_NULL_values(data, windowSize):
+    windows = []
+    for i in range(6, len(data)-windowSize):
+        a_data = data[i-6:i]
+        a_data.append(data[i+windowSize-7])
+        if 'NULL' not in a_data:
+            windows.append(a_data)
     sc = MinMaxScaler(feature_range = (0, 1))
+    npdata = sc.fit_transform(np.array(windows).reshape(-1,1))
+    return npdata, sc
 
-    npTrain = sc.fit_transform(np.array(trainRaw).reshape(-1,1))
-    npTest = sc.fit_transform(np.array(testRaw).reshape(-1,1))
-
-    X_train, y_train = splitXy(npTrain,windowSize)
-    X_test, y_test = splitXy(npTest,windowSize)
+def transfromData(trainRaw, testRaw,windowSize):  ##Train ratial, train, test
+    X_test, y_test,sc = splitXy(testRaw,windowSize)
+    X_train, y_train, sc = splitXy(trainRaw,windowSize)
     return sc, X_train, y_train, X_test, y_test
 
-def splitXy(data, windowSize):
+def splitXy(rawdata, windowSize):
+    data, sc = clean_NULL_values(rawdata,windowSize)
     windows = []
     for i in range(6, data.shape[0]-windowSize):
         a_data = data[i-6:i, 0].tolist()
-        a_data.append(data[i+windowSize-7])
+        a_data.append(data[i])
         windows.append(a_data)
     np.random.shuffle(windows)
     X = []
@@ -58,7 +64,7 @@ def splitXy(data, windowSize):
     X, y = np.array(X), np.array(y)
     print(y.shape)
     X = np.reshape(X, (X.shape[0], X.shape[1], 1))
-    return X,y
+    return X,y, sc
 def buildModel():
     regressor = Sequential()
     #regressor.add(Bidirectional(LSTM(units=50,return_sequences=True),input_shape = (X_train.shape[1], 1)))
@@ -91,12 +97,11 @@ def writeExcelHead(sheet1,epochs,station):
         raw+=1
 
 ##get data##
-
 def fetchData(station,windowSize):
 
-    with open('pickles/'+station+'2017trainRaw.pickle', 'rb') as handle:
+    with open('data_src/array/'+station+'train.pickle', 'rb') as handle:
         trainRawData = pickle.load(handle)
-    with open('pickles/'+station+'2017testRaw.pickle', 'rb') as handle:
+    with open('data_src/array/'+station+'train.pickle', 'rb') as handle:
         testRawData = pickle.load(handle)
 
     sc, X_train, y_train, X_test, y_test = transfromData(trainRawData,testRawData,windowSize)
@@ -105,11 +110,9 @@ def fetchData(station,windowSize):
 def train(model,epochs,windowSize,station):
 
     sc, X_train, y_train, X_test, y_test = fetchData(station,windowSize)
-
-
     for i in range(epochs):
         model.fit(X_train, y_train,validation_split=0.2, epochs = 1, batch_size = 32,verbose=0)
-        print('Current Epoch:',i,'time steps : ', windowSize-6)
+        #print('Current Epoch:',i,'time steps : ', windowSize-6)
 
 
     predicted = sc.inverse_transform(model.predict(X_test))
@@ -122,8 +125,6 @@ def train(model,epochs,windowSize,station):
     return mse,mae
 
 
-
-
 epochs = 250
 stationList = getStationList()
 col=1
@@ -131,7 +132,7 @@ for station in stationList:
     print("training : " +station)
     MSEs = []
     MAEs = []
-    for windowSize in range(7,31):
+    for windowSize in tqdm(range(7,31)):
         model = buildModel()
         mse,mae = train(model,epochs,windowSize,station)
         MSEs.append(mse)
